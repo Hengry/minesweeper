@@ -64,7 +64,7 @@ interface State {
   contentMap: number[];
   statusMap: Array<Status>;
   gameStarted: boolean;
-  bombIndex?: boolean;
+  bombIndex?: number;
 }
 
 type Actions =
@@ -92,6 +92,7 @@ const reducer = (state: State, action: Actions): State => {
           state.contentMap[action.payload] === -1
             ? {
                 ...state,
+                bombIndex: action.payload,
                 statusMap: Array.from(
                   { length: state.width * state.height },
                   () => 'revealed'
@@ -181,6 +182,7 @@ const App = () => {
                 status={state.statusMap[index]}
                 onClick={handleClick}
                 onRightClick={handleRightClick}
+                bombed={state.bombIndex === index}
               />
             ))}
           </div>
