@@ -148,7 +148,7 @@ export const reducer = (state: State, action: Actions): State => {
       }
       return state;
     case 'flag':
-      if (state.gameStarted) {
+      if (state.gameStarted && state.statusMap[action.payload] !== 'revealed') {
         const newStatus = [...state.statusMap];
         newStatus[action.payload] =
           newStatus[action.payload] === 'flagged' ? 'default' : 'flagged';
@@ -174,11 +174,15 @@ export const reducer = (state: State, action: Actions): State => {
   }
 };
 
+const width = 10;
+const height = 10;
+const minesCount = 15;
+
 export const initialState: State = {
-  width: 10,
-  height: 10,
-  minesCount: 10,
-  contentMap: Array.from({ length: 10 * 10 }, () => 0),
-  statusMap: Array.from({ length: 10 * 10 }, () => 'default'),
+  width,
+  height,
+  minesCount,
+  contentMap: Array.from({ length: width * height }, () => 0),
+  statusMap: Array.from({ length: width * height }, () => 'default'),
   gameStarted: false,
 };

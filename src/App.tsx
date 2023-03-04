@@ -3,6 +3,7 @@ import chunk from 'lodash/chunk';
 
 import { reducer, initialState } from './minesweeperReducer';
 import Brick from './components/Brick';
+import Timer from './components/Timer';
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -33,11 +34,25 @@ const App = () => {
   );
 
   return (
-    <div className='App'>
-      <div className='w-full flex flex-col items-center'>
-        <button type='button' className='text-8xl my-4' onClick={handleReset}>
-          {typeof state.bombIndex === 'undefined' ? '😀' : '😵'}
-        </button>
+    <div className='w-full flex flex-col items-center'>
+      <div className='w-fit flex flex-col items-center'>
+        <div className='w-full flex my-4'>
+          <div className='flex-1' />
+          <button type='button' className='text-8xl mx-4' onClick={handleReset}>
+            {typeof state.bombIndex === 'undefined' ? '😀' : '😵'}
+          </button>
+          <div className='flex-1 flex flex-col justify-between'>
+            <div>
+              <div>Timer</div>
+              <Timer enabled={state.gameStarted} />
+            </div>
+            <div>
+              <div>Mine remain</div>
+              <div>1</div>
+            </div>
+          </div>
+        </div>
+
         <div className='border border-gray-500'>
           {brickMatrix.map(({ bricks, rowIndex }) => (
             <div key={rowIndex} className='flex'>

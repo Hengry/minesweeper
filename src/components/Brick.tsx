@@ -39,7 +39,7 @@ const Brick = ({
       aria-label='brick'
       className={twMerge(
         'min-w-[32px] min-h-[32px] border-2 text-lg text-white bg-gray-400',
-        'active:border-gray-600 active:border',
+        status === 'default' && 'active:border-gray-600 active:border',
         status === 'revealed'
           ? 'border border-gray-600'
           : 'border-l-gray-100 border-t-gray-100 border-r-gray-600 border-b-gray-600',
@@ -58,4 +58,4 @@ const Brick = ({
 };
 Brick.defaultProps = defaultProps;
 
-export default Brick;
+export default React.memo(Brick);
