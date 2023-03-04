@@ -5,6 +5,17 @@ import chunk from 'lodash/chunk';
 import Brick from './components/Brick';
 import { Status } from './types';
 
+const getAdjacentIndices = (index: number, width: number) => [
+  index - width - 1,
+  index - width,
+  index - width + 1,
+  index + 1,
+  index - 1,
+  index + width - 1,
+  index + width,
+  index + width + 1,
+];
+
 interface InitMap {
   width: number;
   height: number;
@@ -18,11 +29,9 @@ const initMap = ({ width, height, minesCount, indexEnsureNoMine }: InitMap) => {
   minesMap.splice(indexEnsureNoMine, 0, 0);
   return minesMap.map((_, index) => {
     if (minesMap[index]) return -1;
-    return (
-      (minesMap[index + 1] || 0) +
-      (minesMap[index - 1] || 0) +
-      (minesMap[index + width] || 0) +
-      (minesMap[index - width] || 0)
+    return getAdjacentIndices(index, width).reduce(
+      (sum, i) => sum + minesMap[i] || 0,
+      0
     );
   });
 };
