@@ -1,37 +1,31 @@
 import React from 'react';
 import { twMerge } from 'tailwind-merge';
-import { Status } from '../types';
+import useMinesweeperStore from '../features/minesweeper/store';
+import { Status } from '../features/minesweeper/types';
 
 interface BrickProps {
   content: number;
   status: Status;
   numbering: number;
-  onClick: (numbering: number) => void;
-  onDoubleClick: (numbering: number) => void;
-  onRightClick: (numbering: number) => void;
   bombIndex?: number;
 }
 const defaultProps = {
   bombIndex: undefined,
 };
-const Brick = ({
-  content,
-  status,
-  numbering,
-  bombIndex,
-  onClick,
-  onDoubleClick,
-  onRightClick,
-}: BrickProps) => {
+const Brick = ({ content, status, numbering, bombIndex }: BrickProps) => {
+  const reveal = useMinesweeperStore(state => state.reveal);
+  const revealAll = useMinesweeperStore(state => state.revealAll);
+  const flag = useMinesweeperStore(state => state.flag);
+  console.log('render');
   const handleClick = () => {
-    onClick(numbering);
+    reveal(numbering);
   };
   const handleDoubleClick = () => {
-    if (status === 'revealed') onDoubleClick(numbering);
+    if (status === 'revealed') revealAll(numbering);
   };
   const handleRightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    onRightClick(numbering);
+    flag(numbering);
   };
   const bombed = bombIndex === numbering;
   return (

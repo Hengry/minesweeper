@@ -49,6 +49,14 @@
     "implicit-arrow-linebreak": "off",
     "arrow-parens": ["error", "as-needed"],
     "no-confusing-arrow": "off",
-    "function-paren-newline": "off"
+    "function-paren-newline": "off",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": false,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
+    ]
   }
 }
