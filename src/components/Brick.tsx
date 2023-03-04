@@ -7,6 +7,7 @@ interface BrickProps {
   status: Status;
   numbering: number;
   onClick: (numbering: number) => void;
+  onDoubleClick: (numbering: number) => void;
   onRightClick: (numbering: number) => void;
   bombIndex?: number;
 }
@@ -16,10 +17,14 @@ const Brick = ({
   numbering,
   bombIndex,
   onClick,
+  onDoubleClick,
   onRightClick,
 }: BrickProps) => {
   const handleClick = () => {
     onClick(numbering);
+  };
+  const handleDoubleClick = () => {
+    if (status === 'revealed') onDoubleClick(numbering);
   };
   const handleRightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -39,6 +44,7 @@ const Brick = ({
       )}
       type='button'
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
       disabled={typeof bombIndex !== 'undefined'}
     >

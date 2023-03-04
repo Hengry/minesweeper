@@ -69,11 +69,15 @@ interface State {
 
 type Actions =
   | {
-      type: 'click';
+      type: 'reveal';
       payload: number;
     }
   | {
-      type: 'rightClick';
+      type: 'revealAll';
+      payload: number;
+    }
+  | {
+      type: 'flag';
       payload: number;
     }
   | {
@@ -82,7 +86,7 @@ type Actions =
 
 const reducer = (state: State, action: Actions): State => {
   switch (action.type) {
-    case 'click': {
+    case 'reveal': {
       if (state.statusMap[action.payload] !== 'default') return state;
       let newState: State;
       if (state.gameStarted) {
@@ -121,12 +125,32 @@ const reducer = (state: State, action: Actions): State => {
       return newState.contentMap[action.payload] === 0
         ? getAdjacentIndices(action.payload, state.width, state.height).reduce(
             (nextState, index) =>
-              reducer(nextState, { type: 'click', payload: index }),
+              reducer(nextState, { type: 'reveal', payload: index }),
             newState
           )
         : newState;
     }
-    case 'rightClick':
+    case 'revealAll':
+      if (state.statusMap[action.payload] !== 'default') {
+        const adjacentIndices = getAdjacentIndices(
+          action.payload,
+          state.width,
+          state.height
+        );
+        const flagCounts = adjacentIndices.reduce(
+          (sum, index) => sum + (state.statusMap[index] === 'flagged' ? 1 : 0),
+          0
+        );
+        if (flagCounts === state.contentMap[action.payload]) {
+          return adjacentIndices.reduce(
+            (nextState, index) =>
+              reducer(nextState, { type: 'reveal', payload: index }),
+            state
+          );
+        }
+      }
+      return state;
+    case 'flag':
       if (state.gameStarted) {
         const newStatus = [...state.statusMap];
         newStatus[action.payload] =
@@ -166,11 +190,15 @@ const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleClick = useCallback((numbering: number) => {
-    dispatch({ type: 'click', payload: numbering });
+    dispatch({ type: 'reveal', payload: numbering });
+  }, []);
+
+  const handleDoubleClick = useCallback((numbering: number) => {
+    dispatch({ type: 'revealAll', payload: numbering });
   }, []);
 
   const handleRightClick = useCallback((numbering: number) => {
-    dispatch({ type: 'rightClick', payload: numbering });
+    dispatch({ type: 'flag', payload: numbering });
   }, []);
 
   const handleReset = useCallback(() => {
@@ -202,6 +230,7 @@ const App = () => {
                   content={content}
                   status={state.statusMap[index]}
                   onClick={handleClick}
+                  onDoubleClick={handleDoubleClick}
                   onRightClick={handleRightClick}
                   bombIndex={state.bombIndex}
                 />
