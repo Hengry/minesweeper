@@ -1,5 +1,6 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import sampleSize from 'lodash/sampleSize';
+import chunk from 'lodash/chunk';
 
 import Brick from './components/Brick';
 import { Status } from './types';
@@ -88,12 +89,33 @@ const initialState = {
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const handleClick = useCallback(() => {}, []);
+  const handleClick = useCallback((numbering: number) => {
+    dispatch({ type: 'click', payload: numbering });
+  }, []);
+  const brickMatrix = useMemo(
+    () =>
+      chunk(
+        state.contentMap.map((content, index) => ({ content, index })),
+        state.width
+      ).map((bricks, rowIndex) => ({ rowIndex, bricks })),
+    [state.contentMap, state.width]
+  );
+
   return (
     <div className='App'>
-      <div className='grid grid-cols-10'>
-        {state.contentMap.map((brickContent, index) => (
-          <Brick content={brickContent} status={state.statusMap[index]} />
+      <div>
+        {brickMatrix.map(({ bricks, rowIndex }) => (
+          <div key={rowIndex} className='flex'>
+            {bricks.map(({ content, index }) => (
+              <Brick
+                key={index}
+                numbering={index}
+                content={content}
+                status={state.statusMap[index]}
+                onClick={handleClick}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </div>
