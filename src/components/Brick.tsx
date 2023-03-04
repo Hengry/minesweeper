@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { Status } from '../types';
 
 interface BrickProps {
@@ -14,11 +15,17 @@ const Brick = ({ content, status, numbering, onClick }: BrickProps) => {
   return (
     <button
       aria-label='brick'
-      className='w-8 h-8 border border-black'
+      className={twMerge(
+        'w-8 h-8 border-2 text-lg text-white',
+        status === 'default'
+          ? 'border-l-gray-100 border-t-gray-100 border-r-gray-700 border-b-gray-700 bg-gray-400'
+          : 'border-gray-700 bg-gray-500'
+      )}
       type='button'
       onClick={handleClick}
+      disabled={status === 'revealed'}
     >
-      {status === 'revealed' ? content : null}
+      {(status === 'revealed' && content) || null}
     </button>
   );
 };

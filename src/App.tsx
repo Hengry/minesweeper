@@ -103,7 +103,7 @@ const reducer = (state: State, action: Actions): State => {
           ),
         };
       }
-      return state.contentMap[action.payload] === 0
+      return newState.contentMap[action.payload] === 0
         ? getAdjacentIndices(action.payload, state.width, state.height).reduce(
             (nextState, index) =>
               state.statusMap[index] === 'default'
@@ -119,12 +119,12 @@ const reducer = (state: State, action: Actions): State => {
   }
 };
 
-const initialState = {
+const initialState: State = {
   width: 10,
   height: 10,
   minesCount: 10,
   contentMap: Array.from({ length: 10 * 10 }, () => 0),
-  statusMap: [],
+  statusMap: Array.from({ length: 10 * 10 }, () => 'default'),
   gameStarted: false,
   gameOvered: false,
 };
