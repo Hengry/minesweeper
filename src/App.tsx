@@ -138,6 +138,16 @@ const reducer = (state: State, action: Actions): State => {
       }
       return state;
     case 'reset':
+      return {
+        ...state,
+        contentMap: Array.from({ length: state.width * state.height }, () => 0),
+        statusMap: Array.from(
+          { length: state.width * state.height },
+          () => 'default'
+        ),
+        gameStarted: false,
+        bombIndex: undefined,
+      };
     default:
       return state;
   }
@@ -154,12 +164,19 @@ const initialState: State = {
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   const handleClick = useCallback((numbering: number) => {
     dispatch({ type: 'click', payload: numbering });
   }, []);
+
   const handleRightClick = useCallback((numbering: number) => {
     dispatch({ type: 'rightClick', payload: numbering });
   }, []);
+
+  const handleReset = useCallback(() => {
+    dispatch({ type: 'reset' });
+  }, []);
+
   const brickMatrix = useMemo(
     () =>
       chunk(
@@ -171,22 +188,27 @@ const App = () => {
 
   return (
     <div className='App'>
-      <div>
-        {brickMatrix.map(({ bricks, rowIndex }) => (
-          <div key={rowIndex} className='flex'>
-            {bricks.map(({ content, index }) => (
-              <Brick
-                key={index}
-                numbering={index}
-                content={content}
-                status={state.statusMap[index]}
-                onClick={handleClick}
-                onRightClick={handleRightClick}
-                bombed={state.bombIndex === index}
-              />
-            ))}
-          </div>
-        ))}
+      <div className='w-full flex flex-col items-center'>
+        <button type='button' className='text-8xl my-4' onClick={handleReset}>
+          {typeof state.bombIndex === 'undefined' ? '😀' : '😵'}
+        </button>
+        <div className='border border-gray-500'>
+          {brickMatrix.map(({ bricks, rowIndex }) => (
+            <div key={rowIndex} className='flex'>
+              {bricks.map(({ content, index }) => (
+                <Brick
+                  key={index}
+                  numbering={index}
+                  content={content}
+                  status={state.statusMap[index]}
+                  onClick={handleClick}
+                  onRightClick={handleRightClick}
+                  bombIndex={state.bombIndex}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -6,15 +6,15 @@ interface BrickProps {
   content: number;
   status: Status;
   numbering: number;
-  bombed: boolean;
   onClick: (numbering: number) => void;
   onRightClick: (numbering: number) => void;
+  bombIndex?: number;
 }
 const Brick = ({
   content,
   status,
   numbering,
-  bombed,
+  bombIndex,
   onClick,
   onRightClick,
 }: BrickProps) => {
@@ -25,21 +25,22 @@ const Brick = ({
     e.preventDefault();
     onRightClick(numbering);
   };
-
+  const bombed = bombIndex === numbering;
   return (
     <button
       aria-label='brick'
       className={twMerge(
-        'w-8 h-8 border-2 text-lg text-white',
+        'min-w-[32px] min-h-[32px] border-2 text-lg text-white bg-gray-400',
+        'active:border-gray-600 active:border',
         status === 'revealed'
-          ? 'border-gray-700 bg-gray-500'
-          : 'border-l-gray-100 border-t-gray-100 border-r-gray-700 border-b-gray-700 bg-gray-400',
+          ? 'border border-gray-600'
+          : 'border-l-gray-100 border-t-gray-100 border-r-gray-600 border-b-gray-600',
         bombed && 'bg-red-600'
       )}
       type='button'
       onClick={handleClick}
       onContextMenu={handleRightClick}
-      disabled={status === 'revealed'}
+      disabled={typeof bombIndex !== 'undefined'}
     >
       {(status === 'revealed' && (content === -1 ? '💣' : content)) || null}
       {status === 'flagged' && '🚩'}
