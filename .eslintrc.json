@@ -47,6 +47,8 @@
     ],
     "@typescript-eslint/comma-dangle": "off",
     "implicit-arrow-linebreak": "off",
-    "arrow-parens": ["error", "as-needed"]
+    "arrow-parens": ["error", "as-needed"],
+    "no-confusing-arrow": "off",
+    "function-paren-newline": "off"
   }
 }
