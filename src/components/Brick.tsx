@@ -1,22 +1,18 @@
 import React from 'react';
 import { twMerge } from 'tailwind-merge';
 import useMinesweeperStore from '../features/minesweeper/store';
-import { Status } from '../features/minesweeper/types';
 
 interface BrickProps {
-  content: number;
-  status: Status;
   numbering: number;
-  bombIndex?: number;
 }
-const defaultProps = {
-  bombIndex: undefined,
-};
-const Brick = ({ content, status, numbering, bombIndex }: BrickProps) => {
+const Brick = ({ numbering }: BrickProps) => {
   const reveal = useMinesweeperStore(state => state.reveal);
   const revealAll = useMinesweeperStore(state => state.revealAll);
   const flag = useMinesweeperStore(state => state.flag);
-  console.log('render');
+  const content = useMinesweeperStore(state => state.contentMap[numbering]);
+  const status = useMinesweeperStore(state => state.statusMap[numbering]);
+  const bombIndex = useMinesweeperStore(state => state.bombIndex);
+
   const handleClick = () => {
     reveal(numbering);
   };
@@ -50,6 +46,5 @@ const Brick = ({ content, status, numbering, bombIndex }: BrickProps) => {
     </button>
   );
 };
-Brick.defaultProps = defaultProps;
 
-export default React.memo(Brick);
+export default Brick;

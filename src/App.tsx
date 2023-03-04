@@ -6,16 +6,19 @@ import Brick from './components/Brick';
 import Timer from './components/Timer';
 
 const App = () => {
-  const { contentMap, width, bombIndex, gameStarted, statusMap, reset } =
-    useMinesweeperStore();
+  const height = useMinesweeperStore(state => state.height);
+  const width = useMinesweeperStore(state => state.width);
+  const bombIndex = useMinesweeperStore(state => state.bombIndex);
+  const gameStarted = useMinesweeperStore(state => state.gameStarted);
+  const reset = useMinesweeperStore(state => state.reset);
 
   const brickMatrix = useMemo(
     () =>
       chunk(
-        contentMap.map((content, index) => ({ content, index })),
+        Array.from({ length: height * width }, (_, index) => index),
         width
       ).map((bricks, rowIndex) => ({ rowIndex, bricks })),
-    [contentMap, width]
+    [height, width]
   );
 
   return (
@@ -41,14 +44,8 @@ const App = () => {
         <div className='border border-gray-500'>
           {brickMatrix.map(({ bricks, rowIndex }) => (
             <div key={rowIndex} className='flex'>
-              {bricks.map(({ content, index }) => (
-                <Brick
-                  key={index}
-                  numbering={index}
-                  content={content}
-                  status={statusMap[index]}
-                  bombIndex={bombIndex}
-                />
+              {bricks.map(index => (
+                <Brick key={index} numbering={index} />
               ))}
             </div>
           ))}
