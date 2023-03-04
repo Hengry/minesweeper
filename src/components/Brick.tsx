@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Status } from '../types';
 
@@ -11,6 +11,9 @@ interface BrickProps {
   onRightClick: (numbering: number) => void;
   bombIndex?: number;
 }
+const defaultProps = {
+  bombIndex: undefined,
+};
 const Brick = ({
   content,
   status,
@@ -53,5 +56,6 @@ const Brick = ({
     </button>
   );
 };
+Brick.defaultProps = defaultProps;
 
 export default Brick;
