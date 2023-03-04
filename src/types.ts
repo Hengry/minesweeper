@@ -1,1 +1,1 @@
-export type Status = 'revealed' | 'flagged' | undefined;
+export type Status = 'revealed' | 'flagged' | 'default';

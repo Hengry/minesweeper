@@ -5,16 +5,37 @@ import chunk from 'lodash/chunk';
 import Brick from './components/Brick';
 import { Status } from './types';
 
-const getAdjacentIndices = (index: number, width: number) => [
-  index - width - 1,
-  index - width,
-  index - width + 1,
-  index + 1,
-  index - 1,
-  index + width - 1,
-  index + width,
-  index + width + 1,
-];
+const getAdjacentIndices = (index: number, width: number, height: number) => {
+  const fullAdjacents = [
+    index - width - 1,
+    index - width,
+    index - width + 1,
+    index - 1,
+    index + 1,
+    index + width - 1,
+    index + width,
+    index + width + 1,
+  ];
+  if (index < width) {
+    fullAdjacents[0] = -1;
+    fullAdjacents[1] = -1;
+    fullAdjacents[2] = -1;
+  } else if (index >= width * (height - 1)) {
+    fullAdjacents[5] = -1;
+    fullAdjacents[6] = -1;
+    fullAdjacents[7] = -1;
+  }
+  if (index % width === 0) {
+    fullAdjacents[0] = -1;
+    fullAdjacents[3] = -1;
+    fullAdjacents[5] = -1;
+  } else if (index % width === height - 1) {
+    fullAdjacents[2] = -1;
+    fullAdjacents[4] = -1;
+    fullAdjacents[7] = -1;
+  }
+  return fullAdjacents.filter(i => i !== -1);
+};
 
 interface InitMap {
   width: number;
@@ -29,7 +50,7 @@ const initMap = ({ width, height, minesCount, indexEnsureNoMine }: InitMap) => {
   minesMap.splice(indexEnsureNoMine, 0, 0);
   return minesMap.map((_, index) => {
     if (minesMap[index]) return -1;
-    return getAdjacentIndices(index, width).reduce(
+    return getAdjacentIndices(index, width, height).reduce(
       (sum, i) => sum + minesMap[i] || 0,
       0
     );
@@ -55,31 +76,43 @@ type Actions =
       type: 'reset';
     };
 
-const reducer = (state: State, action: Actions) => {
+const reducer = (state: State, action: Actions): State => {
   switch (action.type) {
-    case 'click':
+    case 'click': {
+      let newState: State;
       if (state.gameStarted) {
         const newStatus = [...state.statusMap];
         newStatus[action.payload] = 'revealed';
-        return {
+        newState = {
           ...state,
           statusMap: newStatus,
         };
+      } else {
+        newState = {
+          ...state,
+          contentMap: initMap({
+            width: state.width,
+            height: state.height,
+            minesCount: state.minesCount,
+            indexEnsureNoMine: action.payload,
+          }),
+          gameStarted: true,
+          statusMap: Array.from(
+            { length: state.width * state.height },
+            (_, i) => (i === action.payload ? 'revealed' : 'default')
+          ),
+        };
       }
-      // initialize
-      return {
-        ...state,
-        contentMap: initMap({
-          width: state.width,
-          height: state.height,
-          minesCount: state.minesCount,
-          indexEnsureNoMine: action.payload,
-        }),
-        gameStarted: true,
-        statusMap: Array.from({ length: state.width * state.height }, (_, i) =>
-          i === action.payload ? 'revealed' : undefined
-        ),
-      };
+      return state.contentMap[action.payload] === 0
+        ? getAdjacentIndices(action.payload, state.width, state.height).reduce(
+            (nextState, index) =>
+              state.statusMap[index] === 'default'
+                ? reducer(nextState, { type: 'click', payload: index })
+                : nextState,
+            newState
+          )
+        : newState;
+    }
     case 'reset':
     default:
       return state;
