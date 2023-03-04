@@ -64,12 +64,16 @@ interface State {
   contentMap: number[];
   statusMap: Array<Status>;
   gameStarted: boolean;
-  gameOvered: boolean;
+  bombIndex?: boolean;
 }
 
 type Actions =
   | {
       type: 'click';
+      payload: number;
+    }
+  | {
+      type: 'rightClick';
       payload: number;
     }
   | {
@@ -79,14 +83,24 @@ type Actions =
 const reducer = (state: State, action: Actions): State => {
   switch (action.type) {
     case 'click': {
+      if (state.statusMap[action.payload] !== 'default') return state;
       let newState: State;
       if (state.gameStarted) {
         const newStatus = [...state.statusMap];
         newStatus[action.payload] = 'revealed';
-        newState = {
-          ...state,
-          statusMap: newStatus,
-        };
+        newState =
+          state.contentMap[action.payload] === -1
+            ? {
+                ...state,
+                statusMap: Array.from(
+                  { length: state.width * state.height },
+                  () => 'revealed'
+                ),
+              }
+            : {
+                ...state,
+                statusMap: newStatus,
+              };
       } else {
         newState = {
           ...state,
@@ -106,13 +120,22 @@ const reducer = (state: State, action: Actions): State => {
       return newState.contentMap[action.payload] === 0
         ? getAdjacentIndices(action.payload, state.width, state.height).reduce(
             (nextState, index) =>
-              state.statusMap[index] === 'default'
-                ? reducer(nextState, { type: 'click', payload: index })
-                : nextState,
+              reducer(nextState, { type: 'click', payload: index }),
             newState
           )
         : newState;
     }
+    case 'rightClick':
+      if (state.gameStarted) {
+        const newStatus = [...state.statusMap];
+        newStatus[action.payload] =
+          newStatus[action.payload] === 'flagged' ? 'default' : 'flagged';
+        return {
+          ...state,
+          statusMap: newStatus,
+        };
+      }
+      return state;
     case 'reset':
     default:
       return state;
@@ -126,13 +149,15 @@ const initialState: State = {
   contentMap: Array.from({ length: 10 * 10 }, () => 0),
   statusMap: Array.from({ length: 10 * 10 }, () => 'default'),
   gameStarted: false,
-  gameOvered: false,
 };
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const handleClick = useCallback((numbering: number) => {
     dispatch({ type: 'click', payload: numbering });
+  }, []);
+  const handleRightClick = useCallback((numbering: number) => {
+    dispatch({ type: 'rightClick', payload: numbering });
   }, []);
   const brickMatrix = useMemo(
     () =>
@@ -155,6 +180,7 @@ const App = () => {
                 content={content}
                 status={state.statusMap[index]}
                 onClick={handleClick}
+                onRightClick={handleRightClick}
               />
             ))}
           </div>

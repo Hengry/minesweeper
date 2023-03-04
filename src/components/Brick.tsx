@@ -7,25 +7,38 @@ interface BrickProps {
   status: Status;
   numbering: number;
   onClick: (numbering: number) => void;
+  onRightClick: (numbering: number) => void;
 }
-const Brick = ({ content, status, numbering, onClick }: BrickProps) => {
+const Brick = ({
+  content,
+  status,
+  numbering,
+  onClick,
+  onRightClick,
+}: BrickProps) => {
   const handleClick = () => {
     onClick(numbering);
+  };
+  const handleRightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onRightClick(numbering);
   };
   return (
     <button
       aria-label='brick'
       className={twMerge(
         'w-8 h-8 border-2 text-lg text-white',
-        status === 'default'
-          ? 'border-l-gray-100 border-t-gray-100 border-r-gray-700 border-b-gray-700 bg-gray-400'
-          : 'border-gray-700 bg-gray-500'
+        status === 'revealed'
+          ? 'border-gray-700 bg-gray-500'
+          : 'border-l-gray-100 border-t-gray-100 border-r-gray-700 border-b-gray-700 bg-gray-400'
       )}
       type='button'
       onClick={handleClick}
+      onContextMenu={handleRightClick}
       disabled={status === 'revealed'}
     >
-      {(status === 'revealed' && content) || null}
+      {(status === 'revealed' && (content === -1 ? '💣' : content)) || null}
+      {status === 'flagged' && '🚩'}
     </button>
   );
 };
