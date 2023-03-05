@@ -3,13 +3,17 @@ import { create } from 'zustand';
 import { Status } from './types';
 import { getAdjacentIndices, initMap } from './utils';
 
+const sumUpStatus = (array: Array<Status>, target: Status) =>
+  array.reduce((sum, status) => sum + (status === target ? 1 : 0), 0);
+
 interface MinesweeperState {
   width: number;
   height: number;
   minesCount: number;
   contentMap: number[];
   statusMap: Array<Status>;
-  gameStarted: boolean;
+  gameStatus: 'initial' | 'playing' | 'fail' | 'pass';
+  totalFlags: number;
   bombIndex?: number;
   reveal: (index: number) => void;
   revealAll: (index: number) => void;
@@ -20,24 +24,44 @@ interface MinesweeperState {
 const reveal = (state: MinesweeperState, index: number): MinesweeperState => {
   if (state.statusMap[index] !== 'default') return state;
   let newState: MinesweeperState;
-  if (state.gameStarted) {
+  if (state.gameStatus === 'playing') {
     const newStatus = [...state.statusMap];
     newStatus[index] = 'revealed';
-    newState =
-      state.contentMap[index] === -1
-        ? {
-            ...state,
-            bombIndex: index,
-            statusMap: Array.from(
-              { length: state.width * state.height },
-              () => 'revealed'
-            ),
-          }
-        : {
-            ...state,
-            statusMap: newStatus,
-          };
+    const bomb = state.contentMap[index] === -1;
+    if (bomb) {
+      newState = {
+        ...state,
+        gameStatus: 'fail',
+        bombIndex: index,
+        statusMap: Array.from(
+          { length: state.width * state.height },
+          () => 'revealed'
+        ),
+      };
+    } else {
+      const revealedCounts = sumUpStatus(state.statusMap, 'revealed');
+      const maxRevealedCounts = state.height * state.width - state.minesCount;
+
+      const gamePassed = revealedCounts === maxRevealedCounts - 1;
+      if (gamePassed) {
+        const statusMap = state.contentMap.map(content =>
+          content === -1 ? 'flagged' : 'revealed'
+        );
+        newState = {
+          ...state,
+          gameStatus: 'pass',
+          statusMap,
+          totalFlags: sumUpStatus(statusMap, 'flagged'),
+        };
+      } else {
+        newState = {
+          ...state,
+          statusMap: newStatus,
+        };
+      }
+    }
   } else {
+    // initial
     newState = {
       ...state,
       contentMap: initMap({
@@ -46,7 +70,7 @@ const reveal = (state: MinesweeperState, index: number): MinesweeperState => {
         minesCount: state.minesCount,
         indexEnsureNoMine: index,
       }),
-      gameStarted: true,
+      gameStatus: 'playing',
       statusMap: Array.from({ length: state.width * state.height }, (_, i) =>
         i === index ? 'revealed' : 'default'
       ),
@@ -67,15 +91,16 @@ const useMinesweeperStore = create<MinesweeperState>()(set => ({
   width,
   height,
   minesCount,
+  totalFlags: 0,
   contentMap: Array.from({ length: width * height }, () => 0),
   statusMap: Array.from({ length: width * height }, () => 'default'),
-  gameStarted: false,
+  gameStatus: 'initial',
   bombIndex: undefined,
   // reveal is a recursive function so it need to be declared outside
   reveal: (index: number) => set(state => reveal(state, index)),
   revealAll: (index: number) =>
     set(state => {
-      if (state.statusMap[index] !== 'default') {
+      if (state.statusMap[index] === 'revealed') {
         const adjacentIndices = getAdjacentIndices(
           index,
           state.width,
@@ -96,13 +121,17 @@ const useMinesweeperStore = create<MinesweeperState>()(set => ({
     }),
   flag: (index: number) =>
     set(state => {
-      if (state.gameStarted && state.statusMap[index] !== 'revealed') {
+      if (
+        state.gameStatus === 'playing' &&
+        state.statusMap[index] !== 'revealed'
+      ) {
         const newStatus = [...state.statusMap];
-        newStatus[index] =
-          newStatus[index] === 'flagged' ? 'default' : 'flagged';
+        const flagged = newStatus[index] === 'flagged';
+        newStatus[index] = flagged ? 'default' : 'flagged';
         return {
           ...state,
           statusMap: newStatus,
+          totalFlags: flagged ? state.totalFlags - 1 : state.totalFlags + 1,
         };
       }
       return state;
@@ -115,8 +144,9 @@ const useMinesweeperStore = create<MinesweeperState>()(set => ({
         { length: state.width * state.height },
         () => 'default'
       ),
-      gameStarted: false,
+      gameStatus: 'initial',
       bombIndex: undefined,
+      totalFlags: 0,
     })),
 }));
 

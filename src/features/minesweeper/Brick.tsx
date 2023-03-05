@@ -1,6 +1,6 @@
 import React from 'react';
 import { twMerge } from 'tailwind-merge';
-import useMinesweeperStore from '../features/minesweeper/store';
+import useMinesweeperStore from './store';
 
 interface BrickProps {
   numbering: number;
@@ -12,18 +12,19 @@ const Brick = ({ numbering }: BrickProps) => {
   const content = useMinesweeperStore(state => state.contentMap[numbering]);
   const status = useMinesweeperStore(state => state.statusMap[numbering]);
   const bombIndex = useMinesweeperStore(state => state.bombIndex);
+  const gameStatus = useMinesweeperStore(state => state.gameStatus);
 
   const handleClick = () => {
     reveal(numbering);
   };
   const handleDoubleClick = () => {
-    if (status === 'revealed') revealAll(numbering);
+    revealAll(numbering);
   };
   const handleRightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     flag(numbering);
   };
-  const bombed = bombIndex === numbering;
+  const bombed = gameStatus === 'fail' && bombIndex === numbering;
   return (
     <button
       aria-label='brick'
@@ -39,7 +40,7 @@ const Brick = ({ numbering }: BrickProps) => {
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
-      disabled={typeof bombIndex !== 'undefined'}
+      disabled={gameStatus === 'fail' || gameStatus === 'pass'}
     >
       {(status === 'revealed' && (content === -1 ? '💣' : content)) || null}
       {status === 'flagged' && '🚩'}
@@ -47,4 +48,4 @@ const Brick = ({ numbering }: BrickProps) => {
   );
 };
 
-export default Brick;
+export default React.memo(Brick);

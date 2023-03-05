@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const Timer = ({ enabled }: { enabled: boolean }) => {
+interface TimerProps {
+  status: 'initial' | 'playing' | 'stop';
+}
+const Timer = ({ status }: TimerProps) => {
   const [time, setTime] = useState(0);
+  const intervalJob = useRef<NodeJS.Timer>();
   useEffect(() => {
-    if (!enabled) return () => {};
-    setTime(0);
-    const intervalJob = setInterval(() => {
-      setTime(prev => prev + 1);
-    }, 1000);
-    return () => {
-      clearInterval(intervalJob);
-    };
-  }, [enabled]);
-  return <div>{enabled ? time : 0}</div>;
+    clearInterval(intervalJob.current);
+    switch (status) {
+      case 'playing':
+        setTime(0);
+        intervalJob.current = setInterval(() => {
+          setTime(prev => prev + 1);
+        }, 1000);
+        break;
+      case 'initial':
+        setTime(0);
+        break;
+      case 'stop':
+      default:
+    }
+  }, [status]);
+  return <div>{time}</div>;
 };
 
 export default Timer;
-
-const useTimer = () => ({
-  Timer,
-});
