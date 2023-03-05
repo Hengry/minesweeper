@@ -25,6 +25,7 @@ const Brick = ({ numbering }: BrickProps) => {
     flag(numbering);
   };
   const bombed = gameStatus === 'fail' && bombIndex === numbering;
+  const gameEnd = gameStatus === 'fail' || gameStatus === 'pass';
   return (
     <button
       aria-label='brick'
@@ -34,13 +35,14 @@ const Brick = ({ numbering }: BrickProps) => {
         status === 'revealed'
           ? 'border border-gray-600'
           : 'border-l-gray-100 border-t-gray-100 border-r-gray-600 border-b-gray-600',
-        bombed && 'bg-red-600'
+        bombed && 'bg-red-600',
+        !gameEnd && 'hover:bg-stone-300'
       )}
       type='button'
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleRightClick}
-      disabled={gameStatus === 'fail' || gameStatus === 'pass'}
+      disabled={gameEnd}
     >
       {(status === 'revealed' && (content === -1 ? '💣' : content)) || null}
       {status === 'flagged' && '🚩'}
