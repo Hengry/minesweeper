@@ -7,7 +7,6 @@ const Timer = ({ status }: TimerProps) => {
   const [time, setTime] = useState(0);
   const intervalJob = useRef<NodeJS.Timer>();
   useEffect(() => {
-    clearInterval(intervalJob.current);
     switch (status) {
       case 'playing':
         setTime(0);
@@ -21,6 +20,9 @@ const Timer = ({ status }: TimerProps) => {
       case 'stop':
       default:
     }
+    return () => {
+      clearInterval(intervalJob.current);
+    };
   }, [status]);
   return <div>{time}</div>;
 };
