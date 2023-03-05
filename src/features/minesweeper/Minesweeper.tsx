@@ -26,14 +26,14 @@ const Minesweeper = () => {
       <div className='w-full flex my-4'>
         <div className='flex-1' />
         <button type='button' className='text-8xl mx-4' onClick={reset}>
-          {{ initial: '😀', playing: '🫣', fail: '😵', pass: '🤩' }[gameStatus]}
+          {{ initial: '😀', playing: '🫣', fail: '😵', goal: '🤩' }[gameStatus]}
         </button>
         <div className='flex-1 flex flex-col justify-between text-right'>
           <div>
             <div>Time</div>
             <Timer
               status={
-                gameStatus === 'fail' || gameStatus === 'pass'
+                gameStatus === 'fail' || gameStatus === 'goal'
                   ? 'stop'
                   : gameStatus
               }

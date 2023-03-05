@@ -12,7 +12,7 @@ interface MinesweeperState {
   minesCount: number;
   contentMap: number[];
   statusMap: Array<Status>;
-  gameStatus: 'initial' | 'playing' | 'fail' | 'pass';
+  gameStatus: 'initial' | 'playing' | 'fail' | 'goal';
   totalFlags: number;
   bombIndex?: number;
   reveal: (index: number) => void;
@@ -49,7 +49,7 @@ const reveal = (state: MinesweeperState, index: number): MinesweeperState => {
         );
         newState = {
           ...state,
-          gameStatus: 'pass',
+          gameStatus: 'goal',
           statusMap,
           totalFlags: sumUpStatus(statusMap, 'flagged'),
         };

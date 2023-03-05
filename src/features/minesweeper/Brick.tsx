@@ -25,18 +25,18 @@ const Brick = ({ numbering }: BrickProps) => {
     flag(numbering);
   };
   const bombed = gameStatus === 'fail' && bombIndex === numbering;
-  const gameEnd = gameStatus === 'fail' || gameStatus === 'pass';
+  const gameEnd = gameStatus === 'fail' || gameStatus === 'goal';
   return (
     <button
       aria-label='brick'
       className={twMerge(
-        'min-w-[32px] min-h-[32px] border-2 text-lg text-white bg-gray-400',
+        'min-w-[32px] min-h-[32px] border-2 text-lg text-gray-900 font-bold bg-gray-400',
         status === 'default' && 'active:border-gray-600 active:border',
         status === 'revealed'
           ? 'border border-gray-600'
           : 'border-l-gray-100 border-t-gray-100 border-r-gray-600 border-b-gray-600',
         bombed && 'bg-red-600',
-        !gameEnd && 'hover:bg-stone-300'
+        !gameEnd && 'hover:bg-[#b7bcc5]'
       )}
       type='button'
       onClick={handleClick}
